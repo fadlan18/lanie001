@@ -1,9 +1,4 @@
 <template>
-  <div>
-    <div class="bg-red-500 text-white p-4">Tes Tailwind abaq</div>
-    <div style="background-color: #047857; color: white; padding: 1rem;">Tes Tanpa Tailwind</div>
-  </div>
-</template><template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-red-500 text-white">
     <h1 class="text-4xl font-bold mb-4">
       Tailwind CSS Aktif!
