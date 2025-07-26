@@ -4,7 +4,7 @@
       Tailwind CSS Aktif!
     </h1>
     <p class="text-lg">
-      Jika kamu melihat latar belakang merah dan teks putih besar, maka Tailwind bekerja.
+      Jika aba kamu melihat latar belakang merah dan teks putih besar, maka Tailwind bekerja.
     </p>
     <button class="mt-6 px-4 py-2 bg-white text-red-600 font-semibold rounded hover:bg-blue-700 hover:text-white transition">
       Tombol Uji Hover
