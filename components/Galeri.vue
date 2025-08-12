@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import PhotoSwipeLightbox from 'photoswipe/lightbox'
+import PhotoSwipe from 'photoswipe'
 import 'photoswipe/style.css'
 
 const galeris = ref([])
@@ -17,8 +17,7 @@ onMounted(async () => {
       const attr = item.attributes || item
       const imagesData = attr.Image || []
 
-      const images = (imagesData || [])
-        .map(img => ({
+      const images = (imagesData || []).map(img => ({
         url: img.url,
         name: img.name || 'Gambar',
         width: img.width || 1200,
@@ -33,14 +32,6 @@ onMounted(async () => {
         images
       }
     })
-
-    const lightbox = new PhotoSwipeLightbox({
-      gallery: '#galeri-container',
-      children: 'a',
-      pswpModule: () => import('photoswipe')
-    })
-    lightbox.init()
-
   } catch (err) {
     console.error('Galeri fetch error:', err)
     error.value = 'Gagal memuat galeri.'
@@ -52,6 +43,24 @@ onMounted(async () => {
 function toggleExpand(id) {
   expandedThemes.value[id] = !expandedThemes.value[id]
 }
+
+function openSingleImage(image) {
+  const pswp = new PhotoSwipe({
+    dataSource: [
+      {
+        src: `https://api008.tojounauna.go.id${image.url}`,
+        width: image.width,
+        height: image.height,
+        alt: image.name
+      }
+    ],
+    showHideAnimationType: 'fade',
+    zoom: false,
+    arrowKeys: false, // matikan navigasi keyboard
+    closeOnVerticalDrag: true
+  })
+  pswp.init()
+}
 </script>
 
 <template>
@@ -62,7 +71,7 @@ function toggleExpand(id) {
     <div v-if="error" class="text-red-500">{{ error }}</div>
     <div v-if="galeris.length === 0 && !loading" class="text-gray-600">Belum ada data galeri.</div>
 
-    <div id="galeri-container" class="space-y-10">
+    <div class="space-y-10">
       <div
         v-for="galeri in galeris"
         :key="galeri.id"
@@ -76,14 +85,11 @@ function toggleExpand(id) {
         <div v-if="galeri.images.length > 0">
           <!-- Grid galeri -->
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <a
+            <div
               v-for="(image, index) in (expandedThemes[galeri.id] ? galeri.images : galeri.images.slice(0, 4))"
               :key="index"
-              :href="`https://api008.tojounauna.go.id${image.url}`"
-              :data-pswp-width="image.width"
-              :data-pswp-height="image.height"
-              target="_blank"
-              class="block overflow-hidden rounded-lg bg-gray-100 hover:opacity-80 transition"
+              class="block overflow-hidden rounded-lg bg-gray-100 hover:opacity-80 transition cursor-pointer"
+              @click="openSingleImage(image)"
             >
               <div class="aspect-[4/3]">
                 <img
@@ -93,22 +99,19 @@ function toggleExpand(id) {
                   class="w-full h-full object-cover"
                 />
               </div>
-            </a>
+            </div>
           </div>
 
-        
-        <!-- Tombol Lihat Semua / Sembunyikan -->
-<div v-if="galeri.images.length > 4" class="mt-3 flex justify-center">
-  <button
-    @click="toggleExpand(galeri.id)"
-    class="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-md
-           hover:bg-gray-100 hover:border-gray-400 transition"
-  >
-    {{ expandedThemes[galeri.id] ? 'Sembunyikan' : `Lihat Semua (${galeri.images.length})` }}
-  </button>
-</div>
-
-
+          <!-- Tombol Lihat Semua / Sembunyikan -->
+          <div v-if="galeri.images.length > 4" class="mt-3 flex justify-center">
+            <button
+              @click="toggleExpand(galeri.id)"
+              class="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-md
+                    hover:bg-gray-100 hover:border-gray-400 transition"
+            >
+              {{ expandedThemes[galeri.id] ? 'Sembunyikan' : `Lihat Semua (${galeri.images.length})` }}
+            </button>
+          </div>
         </div>
 
         <div v-else class="text-gray-500 italic">Belum ada gambar untuk galeri ini.</div>
