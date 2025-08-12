@@ -13,4 +13,10 @@ export default defineNuxtConfig({
     // prerender index route by default
     '/': { prerender: true },
   },
+
+  nitro: {
+    compatibility: {
+      date: '2025-07-27'
+    }
+  }
 });
