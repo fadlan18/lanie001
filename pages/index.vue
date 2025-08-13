@@ -24,35 +24,34 @@
 
     <div class="flex flex-1">
       <!-- Sidebar -->
-      <!-- Sidebar -->
-<div
-  class="bg-gray-800 text-white w-40 p-4 space-y-4 fixed md:static top-0 left-0 h-full md:h-auto transition-transform duration-300 z-50"
-  :class="{
-    '-translate-x-full': screenIsSmall && !isMenuOpen,
-    'translate-x-0': !screenIsSmall || isMenuOpen
-  }"
->
-  <button
-    v-for="menu in Object.keys(views)"
-    :key="menu"
-    @click="currentViewName = menu; isMenuOpen = false"
-    :class="[
-      'w-full text-left px-4 py-2 rounded transition duration-200 font-semibold',
-      currentViewName === menu
-        ? 'bg-white text-gray-800 shadow'
-        : 'hover:bg-gray-600'
-    ]"
-  >
-    {{ menu }}
-  </button>
-</div>
+      <div
+        class="bg-gray-800 text-white w-40 p-4 space-y-4 fixed md:static top-0 left-0 h-full md:h-auto transition-transform duration-300 z-50"
+        :class="{
+          '-translate-x-full': screenIsSmall && !isMenuOpen,
+          'translate-x-0': !screenIsSmall || isMenuOpen
+        }"
+      >
+        <button
+          v-for="menu in Object.keys(views)"
+          :key="menu"
+          @click="currentViewName = menu; isMenuOpen = false"
+          :class="[
+            'w-full text-left px-4 py-2 rounded transition duration-200 font-semibold',
+            currentViewName === menu
+              ? 'bg-white text-gray-800 shadow'
+              : 'hover:bg-gray-600'
+          ]"
+        >
+          {{ menu }}
+        </button>
+      </div>
 
-    <!-- Overlay -->
-    <div
-  v-if="screenIsSmall && isMenuOpen"
-  class="fixed inset-0 bg-black bg-opacity-50 z-40"
-  @click="isMenuOpen = false"
-></div>
+      <!-- Overlay -->
+      <div
+        v-if="screenIsSmall && isMenuOpen"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40"
+        @click="isMenuOpen = false"
+      ></div>
 
       <!-- Main Content -->
       <div class="flex-1 bg-gray-100 p-6">
@@ -62,13 +61,13 @@
 
     <!-- Footer -->
     <div class="bg-gray-800 text-white py-3 text-center">
-      Footer
+      © 2025 - Lanie Ceisya Emier Labs
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Profil from '@/components/Profil.vue'
 import Galeri from '@/components/Galeri.vue'
 import Diary from '@/components/Diary.vue'
@@ -78,7 +77,22 @@ const currentViewName = ref('Profil')
 
 // Menu toggle
 const isMenuOpen = ref(false)
-const screenIsSmall = computed(() => window.innerWidth < 768)
+const screenIsSmall = ref(false)
+
+// Fungsi update ukuran layar
+function updateScreenSize() {
+  screenIsSmall.value = window.innerWidth < 768
+}
+
+// Jalankan hanya di client
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateScreenSize)
+})
 
 // Header state
 const headerText = ref('Memuat...')
