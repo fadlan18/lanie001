@@ -8,17 +8,20 @@ const loading = ref(true)
 const error = ref(null)
 const expandedThemes = ref({}) // simpan state tema yang di-expand
 
+const API_URL = 'https://api008.tojounauna.go.id'
+
 onMounted(async () => {
   try {
-    const res = await fetch('https://api008.tojounauna.go.id/api/galeris?populate=*')
+    const res = await fetch(`${API_URL}/api/app100-galeris?populate=*`)
     const json = await res.json()
 
     galeris.value = (json.data || []).map(item => {
+      // di API Anda, strukturnya langsung ada field tema, time, images
       const attr = item.attributes || item
-      const imagesData = attr.Image || []
+      const imagesData = attr.images || []
 
       const images = (imagesData || []).map(img => ({
-        url: img.url,
+        url: img.url, // masih relative
         name: img.name || 'Gambar',
         width: img.width || 1200,
         height: img.height || 800
@@ -27,8 +30,8 @@ onMounted(async () => {
 
       return {
         id: item.id,
-        tema: attr.Tema || 'Tanpa Tema',
-        date: attr.Date || attr.createdAt || '',
+        tema: attr.tema || 'Tanpa Tema',
+        date: attr.time || attr.createdAt || '',
         images
       }
     })
@@ -48,7 +51,7 @@ function openSingleImage(image) {
   const pswp = new PhotoSwipe({
     dataSource: [
       {
-        src: `https://api008.tojounauna.go.id${image.url}`,
+        src: `${API_URL}${image.url}`,
         width: image.width,
         height: image.height,
         alt: image.name
@@ -56,7 +59,7 @@ function openSingleImage(image) {
     ],
     showHideAnimationType: 'fade',
     zoom: false,
-    arrowKeys: false, // matikan navigasi keyboard
+    arrowKeys: false,
     closeOnVerticalDrag: true
   })
   pswp.init()
@@ -93,7 +96,7 @@ function openSingleImage(image) {
             >
               <div class="aspect-[4/3]">
                 <img
-                  :src="`https://api008.tojounauna.go.id${image.url}`"
+                  :src="`${API_URL}${image.url}`"
                   :alt="image.name"
                   loading="lazy"
                   class="w-full h-full object-cover"

@@ -5,20 +5,21 @@ const profil = ref(null)
 const loading = ref(true)
 const error = ref(null)
 
-function getImageUrl(fotoObj) {
-  if (!fotoObj || !fotoObj.url) return null
-  const selected = fotoObj.formats?.medium || fotoObj
+// Fungsi untuk mengambil URL gambar dari objek images
+function getImageUrl(imagesObj) {
+  if (!imagesObj) return null
+  const selected = imagesObj.formats?.medium || imagesObj
   return 'https://api008.tojounauna.go.id' + selected.url
 }
 
 onMounted(async () => {
   try {
-    const res = await fetch('https://api008.tojounauna.go.id/api/profils?populate=Foto')
+    const res = await fetch('https://api008.tojounauna.go.id/api/app100-profils?populate=*')
     if (!res.ok) throw new Error('Gagal mengambil data profil')
 
     const json = await res.json()
     if (json.data && json.data.length > 0) {
-      profil.value = json.data[0] // ambil item pertama
+      profil.value = json.data[0] // 👈 langsung ambil tanpa `.attributes`
     }
   } catch (err) {
     console.error(err)
@@ -31,7 +32,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-b from-green-50 to-green-100 p-6">
-    <h2 class="text-3xl font-bold mb-6 text-green-800 text-center">myProfile</h2>
+    <h2 class="text-3xl font-bold mb-6 text-green-800 text-center"></h2>
 
     <div v-if="loading" class="text-center text-gray-600">Memuat profil...</div>
     <div v-else-if="error" class="text-center text-red-500">{{ error }}</div>
@@ -45,9 +46,9 @@ onMounted(async () => {
         <!-- Foto -->
         <div class="bg-white rounded-xl shadow-md p-3 flex justify-center items-center w-full sm:w-64">
           <img
-            v-if="getImageUrl(profil.Foto)"
-            :src="getImageUrl(profil.Foto)"
-            :alt="profil.Foto?.name || 'Foto Profil'"
+            v-if="getImageUrl(profil.images)"
+            :src="getImageUrl(profil.images)"
+            :alt="profil.images?.name || 'Foto Profil'"
             class="w-full h-auto max-h-[320px] object-contain rounded-lg"
           />
           <div
@@ -61,11 +62,11 @@ onMounted(async () => {
         <!-- Info -->
         <div class="flex-1 space-y-3">
           <h3 class="text-2xl font-bold text-green-800">
-            {{ profil.Nama }}
+            {{ profil.nama || 'Tanpa Nama' }}
           </h3>
 
           <p class="text-gray-700">
-            <span class="font-medium text-green-700">Email:</span> {{ profil.Email }}
+            <span class="font-medium text-green-700">Email:</span> {{ profil.email }}
           </p>
 
           <p class="text-gray-700">
@@ -73,15 +74,11 @@ onMounted(async () => {
           </p>
 
           <p class="text-gray-700">
-            <span class="font-medium text-green-700">Tahun Masuk:</span> {{ profil.Tahun_Masuk }}
-          </p>
-
-          <p class="text-gray-700">
-            <span class="font-medium text-green-700">Hobi:</span> {{ profil.Hobi }}
+            <span class="font-medium text-green-700">Hobi:</span> {{ profil.hobi || '-' }}
           </p>
 
           <p class="text-gray-600 whitespace-pre-line text-justify leading-relaxed">
-            {{ profil.Kredo }}
+            {{ profil.kredo }}
           </p>
         </div>
       </div>

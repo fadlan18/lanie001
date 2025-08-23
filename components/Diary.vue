@@ -43,10 +43,20 @@ function toggleExpand(id) {
 // Ambil data API
 onMounted(async () => {
   try {
-    const res = await fetch('https://api008.tojounauna.go.id/api/diaries?populate=*')
+    const res = await fetch('https://api008.tojounauna.go.id/api/app100-catatans?populate=*')
     if (!res.ok) throw new Error('Gagal mengambil data')
     const json = await res.json()
-    diaries.value = json.data
+
+    // mapping data agar seragam dengan template
+    diaries.value = (json.data || []).map(item => {
+      return {
+        id: item.id,
+        tema: item.tema,
+        konten: item.konten,
+        tanggal: item.time || item.createdAt,
+        images: item.images
+      }
+    })
   } catch (err) {
     console.error(err)
     error.value = 'Gagal memuat data diary.'
@@ -68,63 +78,59 @@ onMounted(async () => {
 
     <div v-else>
       <ul class="space-y-6">
-       
-      <li
-  v-for="item in diaries"
-  :key="item.id"
-  class="border border-emerald-700 rounded-lg p-4 
-         bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 
-         shadow-lg max-w-4xl mx-auto text-gray-200"
->
-  <div class="flex flex-col sm:flex-row gap-4 items-start">
-    <div v-if="item.Foto" class="flex-shrink-0 w-full sm:w-40 cursor-pointer">
-      <img
-        :src="getImageUrl(item.Foto.formats?.medium || item.Foto)"
-        :alt="item.Foto.name"
-        class="rounded shadow-md w-full h-auto object-cover max-h-48 transition-transform hover:scale-105"
-        @click="openZoom(getImageUrl(item.Foto))"
-      />
-    </div>
-
-    <div class="flex-1">
-      <h3 class="text-2xl font-semibold text-emerald-300 mb-2">
-        {{ item.Tema }}
-      </h3>
-
-      <transition name="fade-slide" mode="out-in">
-        <p
-          key="expandedItems[item.id]"
-          class="text-gray-200 text-justify whitespace-pre-line"
+        <li
+          v-for="item in diaries"
+          :key="item.id"
+          class="border border-emerald-700 rounded-lg p-4 
+                 bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 
+                 shadow-lg max-w-4xl mx-auto text-gray-200"
         >
-          {{ expandedItems[item.id] 
-              ? extractPlainText(item.Catatan) 
-              : getShortText(extractPlainText(item.Catatan), 200) }}
-        </p>
-      </transition>
+          <div class="flex flex-col sm:flex-row gap-4 items-start">
+            <!-- Foto -->
+            <div v-if="item.images" class="flex-shrink-0 w-full sm:w-40 cursor-pointer">
+              <img
+                :src="getImageUrl(item.images.formats?.small || item.images)"
+                :alt="item.images.name"
+                class="rounded shadow-md w-full h-auto object-cover max-h-48 transition-transform hover:scale-105"
+                @click="openZoom(getImageUrl(item.images))"
+              />
+            </div>
 
-      <div v-if="extractPlainText(item.Catatan).length > 200" class="mt-3">
-        <button
-          @click="toggleExpand(item.id)"
-          class="px-4 py-1 rounded-full text-sm font-medium transition duration-300 shadow-md"
-          :class="expandedItems[item.id] 
-            ? 'bg-emerald-500 hover:bg-emerald-400 text-white' 
-            : 'bg-emerald-600 hover:bg-emerald-500 text-white'"
-        >
-          {{ expandedItems[item.id] ? 'Sembunyikan' : 'Selengkapnya' }}
-        </button>
-      </div>
+            <!-- Konten -->
+            <div class="flex-1">
+              <h3 class="text-2xl font-semibold text-emerald-300 mb-2">
+                {{ item.tema }}
+              </h3>
 
-      <p class="text-xs text-emerald-200 mt-3">
-        📅 {{ item.Tanngal || 'Tidak diketahui' }}
-      </p>
-    </div>
-  </div>
-</li>
+              <transition name="fade-slide" mode="out-in">
+                <p
+                  key="expandedItems[item.id]"
+                  class="text-gray-200 text-justify whitespace-pre-line"
+                >
+                  {{ expandedItems[item.id] 
+                      ? extractPlainText(item.konten) 
+                      : getShortText(extractPlainText(item.konten), 200) }}
+                </p>
+              </transition>
 
+              <div v-if="extractPlainText(item.konten).length > 200" class="mt-3">
+                <button
+                  @click="toggleExpand(item.id)"
+                  class="px-4 py-1 rounded-full text-sm font-medium transition duration-300 shadow-md"
+                  :class="expandedItems[item.id] 
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-white' 
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'"
+                >
+                  {{ expandedItems[item.id] ? 'Sembunyikan' : 'Selengkapnya' }}
+                </button>
+              </div>
 
-
-
-
+              <p class="text-xs text-emerald-200 mt-3">
+                📅 {{ new Date(item.tanggal).toLocaleDateString('id-ID',{ dateStyle:'long'}) }}
+              </p>
+            </div>
+          </div>
+        </li>
       </ul>
     </div>
 
